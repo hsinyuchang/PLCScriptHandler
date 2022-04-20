@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<MXConfig LogicalStationNumber="1">
+	<Event Address ="D0" LowerBit="0" UpperBit="0">
+		<Response ExpectValue="1">
+			<Write WriteAddr="D1" LowerBit="0" UpperBit="3" WriteValue="4" DelayTime="0" />
+			<Write WriteAddr="D1" LowerBit="8" UpperBit="12" WriteValue="4" DelayTime="2000" />
+		</Response>
+		<Response ExpectValue="0">
+			<Write WriteAddr="D1" LowerBit="0" UpperBit="3" WriteValue="7" DelayTime="5000" />
+			<Write WriteAddr="D1" LowerBit="8" UpperBit="12" WriteValue="7" DelayTime="0" />
+		</Response>
+	</Event>
+	<Action Name="Test">
+		<Write WriteAddr="D2" LowerBit="6" UpperBit="8" WriteValue="7" DelayTime="0" />
+	</Action>
+</MXConfig>

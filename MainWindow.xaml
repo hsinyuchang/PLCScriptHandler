@@ -7,6 +7,10 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        
+        <TabControl>
+            <TabItem Header="Action">
+                <Frame Source="View\FireAction.xaml" />
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>
