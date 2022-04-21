@@ -39,12 +39,14 @@ namespace Mirle.AK1.PLCScriptHandler.ViewModel
 
         #region Commands
         public ICommand FireButtonCommand { get; }
+        public ICommand MonitorEventButtonCommand { get; }
         #endregion
 
         #region Constructors
         public FireActionViewModel()
         {
             FireButtonCommand = new CommandImplementation(_ => onFireButtonCommand());
+            MonitorEventButtonCommand = new CommandImplementation(_ => onMonitorEventButtonCommand());
 
             Dictionary<string, PLCAction> pLCActions = new Dictionary<string, PLCAction>();
             List<PLCEvent> pLCEvents = new List<PLCEvent>();
@@ -58,6 +60,14 @@ namespace Mirle.AK1.PLCScriptHandler.ViewModel
         {
             if (SelectedAction != null)
                 PLCActions[SelectedAction]?.Fire();
+        }
+
+        private void onMonitorEventButtonCommand()
+        {
+            foreach (var ev in PLCEvents)
+            {
+                ev.StartMonitorEvent();
+            }
         }
     }
 }

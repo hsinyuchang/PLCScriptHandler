@@ -19,6 +19,7 @@
                      SelectedItem="{Binding SelectedAction, Mode=TwoWay}">
             </ListBox>
             <Button Command="{Binding FireButtonCommand}">Fire</Button>
+            <Button Command="{Binding MonitorEventButtonCommand}">Monitor Event</Button>
         </StackPanel>
     </Grid>
 </Page>
