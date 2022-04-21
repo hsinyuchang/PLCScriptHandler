@@ -16,6 +16,7 @@ namespace Mirle.AK1.PLCScriptHandler.Driver
             xmlDoc.Load("PLCFunction.xml");
 
             PLCDriver.LogicalStationNumber = Convert.ToInt32(xmlDoc?.DocumentElement?.Attributes?["LogicalStationNumber"]?.Value);
+            var eventInterval = Convert.ToInt32(xmlDoc?.DocumentElement?.Attributes?["CheckEventInterval"]?.Value);
             XmlNodeList eventNodeList = xmlDoc?.SelectNodes("MXConfig/Event");
             if (eventNodeList != null)
             {
@@ -25,7 +26,7 @@ namespace Mirle.AK1.PLCScriptHandler.Driver
                     if (string.IsNullOrEmpty(eventAddr))
                         continue;
 
-                    PLCEvent newPLCEvent = new PLCEvent();
+                    PLCEvent newPLCEvent = new PLCEvent(eventInterval);
                     newPLCEvent.EventAddress = eventAddr;
                     newPLCEvent.LowerBit = Convert.ToUInt16(eventNode?.Attributes?["LowerBit"]?.Value);
                     newPLCEvent.UpperBit = Convert.ToUInt16(eventNode?.Attributes?["UpperBit"]?.Value);
@@ -33,7 +34,7 @@ namespace Mirle.AK1.PLCScriptHandler.Driver
                     {
                         foreach (XmlNode responseNode in eventNode.ChildNodes)
                         {
-                            PLCEventResponse eventResponse = new PLCEventResponse();
+                            PLCEvent.PLCEventResponse eventResponse = new PLCEvent.PLCEventResponse();
                             eventResponse.ExpectedValue = Convert.ToUInt16(responseNode?.Attributes?["ExpectValue"]?.Value);
                             if (responseNode?.ChildNodes != null)
                             {
@@ -48,7 +49,7 @@ namespace Mirle.AK1.PLCScriptHandler.Driver
                                     int delayTime = Convert.ToInt32(writeNode?.Attributes?["DelayTime"]?.Value);
                                     eventResponse.WriteFuncs.Add(() =>
                                     {
-                                        return PLCDriver.Instance.WriteValue(new PLCWriteClass()
+                                        return PLCDriver.Instance.WriteValue(new PLCDriver.PLCWriteClass()
                                         {
                                             Address = writeAddr,
                                             LowerBit = lowerBit,
@@ -92,7 +93,7 @@ namespace Mirle.AK1.PLCScriptHandler.Driver
                             int delayTime = Convert.ToInt32(writeNode?.Attributes?["DelayTime"]?.Value);
                             newPLCAction.WriteFuncs.Add(() =>
                             {
-                                return PLCDriver.Instance.WriteValue(new PLCWriteClass()
+                                return PLCDriver.Instance.WriteValue(new PLCDriver.PLCWriteClass()
                                 {
                                     Address = writeAddr,
                                     LowerBit = lowerBit,

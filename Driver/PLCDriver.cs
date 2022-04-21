@@ -25,9 +25,9 @@ namespace Mirle.AK1.PLCScriptHandler.Driver
                 instance = this;
         }
 
-        public bool WriteValue(PLCWriteClass plcWrite)
+        public int WriteValue(PLCWriteClass plcWrite)
         {
-            bool result = false;
+            int resultCode = -1;
             if (mxPlc != null)
             {
                 Task.Run(() =>
@@ -39,16 +39,16 @@ namespace Mirle.AK1.PLCScriptHandler.Driver
                     int originalLowerBits = originalValue & ((int)Math.Pow(2, plcWrite.LowerBit) - 1);
                     int originalUpperBits = originalValue >> (plcWrite.UpperBit + 1) << (plcWrite.UpperBit + 1);
                     int afterValue = originalUpperBits | (plcWrite.Value << plcWrite.LowerBit) | originalLowerBits;
-                    int resultCode = mxPlc.WriteDeviceBlock(plcWrite.Address, 1, ref afterValue);
-                    result = (resultCode == 0);
+                    resultCode = mxPlc.WriteDeviceBlock(plcWrite.Address, 1, ref afterValue);
                 });
             }
-            return result;
+            return resultCode;
         }
 
-        public int ReadValue(string address, ushort lowerBit, ushort upperBit)
+        public int ReadValue(string address, ushort lowerBit, ushort upperBit, out int result)
         {
-            int result = -1;
+            int resultCode = -1;
+            result = 0;
             if (mxPlc != null)
             {
                 int originalValue = 0;
@@ -56,16 +56,16 @@ namespace Mirle.AK1.PLCScriptHandler.Driver
                 uint mask = (uint)(Math.Pow(2, upperBit + 1) - 1) ^ (uint)(Math.Pow(2, lowerBit) - 1);
                 result = (int)((originalValue & mask) >> lowerBit);
             }
-            return result;
+            return resultCode;
         }
-    }
 
-    public class PLCWriteClass
-    {
-        public string Address = string.Empty;
-        public ushort LowerBit;
-        public ushort UpperBit;
-        public int Value;
-        public int DelayMilliSeconds;
+        public class PLCWriteClass
+        {
+            public string Address = string.Empty;
+            public ushort LowerBit;
+            public ushort UpperBit;
+            public int Value;
+            public int DelayMilliSeconds;
+        }
     }
 }

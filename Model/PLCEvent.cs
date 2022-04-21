@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace Mirle.AK1.PLCScriptHandler.Model
 {
@@ -14,26 +15,43 @@ namespace Mirle.AK1.PLCScriptHandler.Model
         public ushort UpperBit { get; set; }
         public List<PLCEventResponse> Responses { get; private set; } = new List<PLCEventResponse>();
 
-        public void CheckValue()
+        private Timer timer;
+
+        public PLCEvent(int timerInterval = 1000)
         {
-            var value = PLCDriver.Instance.ReadValue(EventAddress, LowerBit, UpperBit);
-            foreach (var response in Responses)
+            timer = new System.Timers.Timer(timerInterval);
+            timer.Elapsed += (sender, e) => CheckValue();
+        }
+
+        public void StartMonitorEvent()
+        {
+            timer.Start();
+        }
+
+        private void CheckValue()
+        {
+            int value;
+            var resultCode = PLCDriver.Instance.ReadValue(EventAddress, LowerBit, UpperBit, out value);
+            if (resultCode == 0)
             {
-                if (value == response.ExpectedValue)
+                foreach (var response in Responses)
                 {
-                    bool isSuccess = true;
-                    foreach (var func in response.WriteFuncs)
+                    if (value == response.ExpectedValue)
                     {
-                        isSuccess &= func.Invoke();
+                        bool isSuccess = true;
+                        foreach (var func in response.WriteFuncs)
+                            isSuccess &= (func.Invoke() == 0);
                     }
                 }
             }
         }
+
+        public class PLCEventResponse
+        {
+            public ushort ExpectedValue { get; set; }
+            public List<Func<int>> WriteFuncs { get; private set; } = new List<Func<int>>();
+        }
     }
 
-    public class PLCEventResponse
-    {
-        public ushort ExpectedValue { get; set; }
-        public List<Func<bool>> WriteFuncs { get; private set; } = new List<Func<bool>>();
-    }
+
 }
