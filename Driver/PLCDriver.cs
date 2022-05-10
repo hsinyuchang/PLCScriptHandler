@@ -34,12 +34,10 @@ namespace Mirle.AK1.PLCScriptHandler.Driver
                 {
                     Thread.Sleep(plcWrite.DelayMilliSeconds);
 
-                    int originalValue = 0;
-                    mxPlc.ReadDeviceBlock(plcWrite.Address, 1, out originalValue);
-                    int originalLowerBits = originalValue & ((int)Math.Pow(2, plcWrite.LowerBit) - 1);
-                    int originalUpperBits = originalValue >> (plcWrite.UpperBit + 1) << (plcWrite.UpperBit + 1);
-                    int afterValue = originalUpperBits | (plcWrite.Value << plcWrite.LowerBit) | originalLowerBits;
-                    resultCode = mxPlc.WriteDeviceBlock(plcWrite.Address, 1, ref afterValue);
+                    if (plcWrite.Address.StartsWith("B"))
+                        resultCode = WriteValueBit(plcWrite);
+                    else
+                        resultCode = WriteValueBlock(plcWrite);
                 });
             }
             return resultCode;
@@ -57,6 +55,20 @@ namespace Mirle.AK1.PLCScriptHandler.Driver
                 result = (int)((originalValue & mask) >> lowerBit);
             }
             return resultCode;
+        }
+
+        private int WriteValueBit(PLCWriteClass plcWrite)
+        {
+            return mxPlc.SetDevice(plcWrite.Address, plcWrite.Value);
+        }
+
+        private int WriteValueBlock(PLCWriteClass plcWrite)
+        {
+            mxPlc.ReadDeviceBlock(plcWrite.Address, 1, out int originalValue);
+            int originalLowerBits = originalValue & ((int)Math.Pow(2, plcWrite.LowerBit) - 1);
+            int originalUpperBits = originalValue >> (plcWrite.UpperBit + 1) << (plcWrite.UpperBit + 1);
+            int afterValue = originalUpperBits | (plcWrite.Value << plcWrite.LowerBit) | originalLowerBits;
+            return mxPlc.WriteDeviceBlock(plcWrite.Address, 1, ref afterValue);
         }
 
         public class PLCWriteClass
