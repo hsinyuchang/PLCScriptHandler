@@ -45,12 +45,28 @@ namespace Mirle.AK1.PLCScriptHandler.Driver
 
         public int ReadValue(string address, ushort lowerBit, ushort upperBit, out int result)
         {
+            if (address.StartsWith("B"))
+                return ReadValueBit(address, out result);
+            else
+                return ReadValueBlock(address, lowerBit, upperBit, out result);
+        }
+
+        private int ReadValueBit(string address, out int result)
+        {
+            int resultCode = -1;
+            result = 0;
+            if (mxPlc != null)
+                resultCode = mxPlc.GetDevice(address, out result);
+            return resultCode;
+        }
+
+        private int ReadValueBlock(string address, ushort lowerBit, ushort upperBit, out int result)
+        {
             int resultCode = -1;
             result = 0;
             if (mxPlc != null)
             {
-                int originalValue = 0;
-                mxPlc.ReadDeviceBlock(address, 1, out originalValue);
+                resultCode = mxPlc.ReadDeviceBlock(address, 1, out int originalValue);
                 uint mask = (uint)(Math.Pow(2, upperBit + 1) - 1) ^ (uint)(Math.Pow(2, lowerBit) - 1);
                 result = (int)((originalValue & mask) >> lowerBit);
             }
